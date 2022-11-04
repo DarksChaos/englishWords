@@ -1,23 +1,22 @@
 #include <iostream>
 #include <fstream>
 #include "main.hpp"
-#include <string.h>
 
 // ./prog -in words.txt -out found.txt -sub ab -mode 5 -value1 2 -value2 5
 
 #define HELP_MESSAGE "\n\
 Special commands:\n\
 '--help:':    help message\n\
-'--newsort':  create a new sorting info that will be added'\n\
+'--':  create a new sorting info that will be added'\n\
 INFO: Before writing to the output file, you will be prompted to confirm writing.\n\
 Format: './prog [input] [output] [args ...]'\n\n\
 Args:\n\
-'-sub [substring]': set substring\n\
-'-mode [mode]': set mode\n\
-'-value1 [value]': set value 1 (optional depending on mode)\n\
-'-value2 [value]': set value 2 (also optional)\n\
-'-case [true/false]': case sensitivity : true will consider 'E' and 'e' as different letters.\n\
-'-delim [delimiter]' set delimiter (optional: default delimiter is ',')\n\n\
+'-s [substring]': set substring\n\
+'-m [mode]': set mode\n\
+'-v1 [value]': set value 1 (optional depending on mode)\n\
+'-v2 [value]': set value 2 (also optional)\n\
+'-c [true/false]': case sensitivity : true will consider 'E' and 'e' as different letters.\n\
+'-d [delimiter]' set delimiter (optional: default delimiter is ',')\n\n\
 MODES: modes define how words will be chosen (note: limit values are included)\n\
 0: word must not contain the substring\n\
 1: word must contain the substring\n\
@@ -105,7 +104,8 @@ void printSortingInfo(SortingInfo info)
 
 void Exit(std::string msg, int code)
 {
-    std::cout << (code == 0 ? "EXITING: " : "ERROR: ") << msg << " (code " << code << ") (type --help)";
+    std::cout << (code == 0 ? "EXITING: " : "ERROR: ") << msg << " (code " << code
+              << (code == 0 ? ")" : ", type --help for help)");
     exit(code);
 }
 
@@ -203,9 +203,9 @@ void process_args(int argc, char **argv, ParsingInfo *parsingInfo, std::vector<S
             std::cout << HELP_MESSAGE;
             exit(0);
         }
-        if (argument == "--newsort")
+        if (argument == "--")
         {
-            // check if sorting info has been given (prevent error if --newsort is called before any other argument)
+            // check if sorting info has been given (prevent error if | is called before any other argument)
             if (sortingArgGiven)
             {
                 CREATE_INFO;
@@ -215,13 +215,13 @@ void process_args(int argc, char **argv, ParsingInfo *parsingInfo, std::vector<S
         else if (i != argc - 1)
         {
             param = argv[i + 1];
-            if (argument == "-sub")
+            if (argument == "-s" || argument == "-sub")
             {
                 substring = param;
                 sortingArgGiven = true;
             }
 
-            else if (argument == "-case")
+            else if (argument == "-c" || argument == "-case")
             {
                 if (param == "true")
                     caseSensitive = true;
@@ -232,25 +232,25 @@ void process_args(int argc, char **argv, ParsingInfo *parsingInfo, std::vector<S
                 sortingArgGiven = true;
             }
 
-            else if (argument == "-mode")
+            else if (argument == "-m" || argument == "-mode")
             {
                 mode = std::stoi(param);
                 sortingArgGiven = true;
             }
 
-            else if (argument == "-value1" || argument == "-v1")
+            else if (argument == "-v1" || argument == "-value1")
             {
                 value1 = std::stoi(param);
                 sortingArgGiven = true;
             }
 
-            else if (argument == "-value2" || argument == "-v2")
+            else if (argument == "-v2" || argument == "-value2")
             {
                 value2 = std::stoi(param);
                 sortingArgGiven = true;
             }
 
-            else if (argument == "-delim")
+            else if (argument == "-d" || argument == "-delimiter")
             {
                 delimiter = param[0];
             }
@@ -280,12 +280,14 @@ void log(std::string msg)
 int main(int argc, char **argv)
 {
     // INPUT --------------------------------------------------------------
-    log("Step 1, parsing arguments");
+    log("Step 1: parsing arguments");
     ParsingInfo parsingInfo;
     std::vector<SortingInfo> sortingInfo;
     process_args(argc, argv, &parsingInfo, &sortingInfo);
+    log("DONE");
 
     // PARSE FILE ---------------------------------------------------------
+    log("Step 2: parsing file");
     std::vector<std::string> wordList;
     std::string word;
     while (parsingInfo.input)
@@ -300,8 +302,9 @@ int main(int argc, char **argv)
             word += c;
     }
     log("DONE");
+    std::cout << wordList.size() << " words created\n";
     // SORT WORDS ---------------------------------------------------------
-    log("Step 2, Applying sorts");
+    log("Step 3: Applying sorts");
     std::vector<std::string> remainingWords = wordList, buffer;
     for (int i = 0; i < sortingInfo.size(); i++)
     {
@@ -312,11 +315,10 @@ int main(int argc, char **argv)
     }
     log("DONE");
     // WRITE TO FILE ------------------------------------------------------
-    log("Step 3, Writing to file " + std::to_string(remainingWords.size()) + " words");
     std::string confirm;
     int passed = -1;
 
-    std::cout << "Confirm [Y/N]: ";
+    std::cout << "Confirm writing " << remainingWords.size() << " words to file ? [Y/N]: ";
     std::cin >> confirm;
     switch (confirm[0])
     {
@@ -332,6 +334,7 @@ int main(int argc, char **argv)
     if (passed == 0)
         Exit("Cancelled!", 0);
 
+    log("Step 4: Writing to file " + std::to_string(remainingWords.size()) + " words");
     std::string outputStr;
     int size = remainingWords.size();
     for (int i = 0; i < size; i++)
