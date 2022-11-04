@@ -28,33 +28,33 @@ MODES: modes define how words will be chosen (note: limit values are included)\n
 6: word must contain the substring between [value1] and [value2] times\n\
 7: word must contain the substring a number of times not included between [value1] and [value2] times\n"
 
-#define CREATE_INFO                                                                \
-    if (input.size() == 0)                                                         \
-        Exit("Input name not given", 1);                                           \
-    if (output.size() == 0)                                                        \
-        Exit("Output name not given", 1);                                          \
-    if (substring.size() == 0)                                                     \
-        Exit("Substring not given", 1);                                            \
-    switch (mode)                                                                  \
-    {                                                                              \
-    case 0:                                                                        \
-    case 1:                                                                        \
-        break;                                                                     \
-    case 6:                                                                        \
-    case 7:                                                                        \
-        if (value2 < 0)                                                            \
-            Exit("Value 2 required, not provided", 1);                             \
-    case 2:                                                                        \
-    case 3:                                                                        \
-    case 4:                                                                        \
-    case 5:                                                                        \
-        if (value1 < 0)                                                            \
-            Exit("Value1 required, not provided", 1);                              \
-        break;                                                                     \
-    default:                                                                       \
-        Exit("Mode " + std::to_string(mode) + " does not exist", 1);               \
-    }                                                                              \
-    currentInfo = makeSortingInfo(substring, mode, value1, value2, caseSensitive); \
+#define CREATE_INFO                                                                             \
+    if (input.size() == 0)                                                                      \
+        Exit("Input name not given", 1);                                                        \
+    if (output.size() == 0)                                                                     \
+        Exit("Output name not given", 1);                                                       \
+    if (substring.size() == 0)                                                                  \
+        Exit("Substring not given", 1);                                                         \
+    switch (mode)                                                                               \
+    {                                                                                           \
+    case 0:                                                                                     \
+    case 1:                                                                                     \
+        break;                                                                                  \
+    case 6:                                                                                     \
+    case 7:                                                                                     \
+        if (value2 < 0)                                                                         \
+            Exit("Value 2 required, not provided", 1);                                          \
+    case 2:                                                                                     \
+    case 3:                                                                                     \
+    case 4:                                                                                     \
+    case 5:                                                                                     \
+        if (value1 < 0)                                                                         \
+            Exit("Value1 required, not provided", 1);                                           \
+        break;                                                                                  \
+    default:                                                                                    \
+        Exit("Invalid mode " + std::to_string(mode) + " please provide a valid mode (0-7)", 1); \
+    }                                                                                           \
+    currentInfo = makeSortingInfo(substring, mode, value1, value2, caseSensitive);              \
     (*sortingInfo).push_back(currentInfo);
 
 struct ParsingInfo
@@ -182,7 +182,7 @@ void process_args(int argc, char **argv, ParsingInfo *parsingInfo, std::vector<S
     SortingInfo currentInfo;
     bool correct = true, correctArg = true, sortingArgGiven = false, caseSensitive = true;
     std::string input, output, substring;
-    int mode = -1, value1 = -1, value2 = -1;
+    int mode = 1, value1 = -1, value2 = -1; // mode set by default to "word must contain substring"
     char delimiter = ',';
 
     int i = 1;
