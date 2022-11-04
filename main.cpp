@@ -105,7 +105,7 @@ void printSortingInfo(SortingInfo info)
 
 void Exit(std::string msg, int code)
 {
-    std::cout << (code == 0 ? "EXITING: " : "ERROR: ") << msg << " (" << code << ")";
+    std::cout << (code == 0 ? "EXITING: " : "ERROR: ") << msg << " (code " << code << ") (type --help)";
     exit(code);
 }
 
